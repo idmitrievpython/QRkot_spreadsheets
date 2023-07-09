@@ -7,8 +7,8 @@ from app.core.config import settings
 FORMAT = "%Y/%m/%d %H:%M:%S"
 RANGE = 'A1:E30'
 VERSION = 'v4'
-ROWCOUNT = 100
-COLUMNCOUNT = 11
+ROW_COUNT = 100
+COLUMN_COUNT = 11
 
 
 async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
@@ -20,8 +20,8 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
         'sheets': [{'properties': {'sheetType': 'GRID',
                                    'sheetId': 0,
                                    'title': 'Лист1',
-                                   'gridProperties': {'rowCount': ROWCOUNT,
-                                                      'columnCount': COLUMNCOUNT}}}]
+                                   'gridProperties': {'rowCount': ROW_COUNT,
+                                                      'columnCount': COLUMN_COUNT}}}]
     }
     response = await wrapper_services.as_service_account(
         service.spreadsheets.create(json=spread_sheet_body))
@@ -29,17 +29,17 @@ async def spreadsheets_create(wrapper_services: Aiogoogle) -> str:
 
 
 async def set_user_permissions(
-        spread_sheetid: str, wrapper_services: Aiogoogle) -> None:
+        spreadsheet_id: str, wrapper_services: Aiogoogle) -> None:
     permissions_body = {
         'type': 'user', 'role': 'writer', 'emailAddress': settings.email}
     service = await wrapper_services.discover('drive', 'v3')
     await wrapper_services.as_service_account(
         service.permissions.create(
-            fileId=spread_sheetid, json=permissions_body, fields="id"))
+            fileId=spreadsheet_id, json=permissions_body, fields="id"))
 
 
 async def spreadsheets_update_value(
-        spreadsheetid: str, projects: list,
+        spreadsheet_id: str, projects: list,
         wrapper_services: Aiogoogle) -> None:
     service = await wrapper_services.discover('sheets', 'v4')
     table_values = [
@@ -52,7 +52,7 @@ async def spreadsheets_update_value(
     update_body = {'majorDimension': 'ROWS', 'values': table_values}
     await wrapper_services.as_service_account(
         service.spreadsheets.values.update(
-            spreadsheetId=spreadsheetid,
+            spreadsheetId=spreadsheet_id,
             range=RANGE,
             valueInputOption='USER_ENTERED',
             json=update_body))
